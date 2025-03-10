@@ -1,0 +1,80 @@
+[
+    {
+        "key": "walk",
+        "description": {
+            "target": "<int>",
+            "isChase": "<bool>"
+        }
+    },
+    {
+        "key": "run",
+        "description": {
+            "target": "<int>",
+            "isChase": "<bool>"
+        }
+    },
+    {
+        "key": "sit",
+        "description": {
+            "onChair": "<bool>"
+        }
+    },
+    {
+        "key": "stay_still",
+        "description": {
+            "duration": "<float>"
+        }
+    },
+    {
+        "key": "wander",
+        "description": {
+            "duration": "<float>"
+        }
+    },
+    {
+        "key": "turn_around",
+        "description": {
+            "angle": "<float>",
+            "isRight": "<bool> (false: left, true: right)"
+        }
+    },
+    {
+        "key": "pick_up",
+        "description": {
+            "item": "<int>"
+        }
+    },
+    {
+        "key": "drop",
+        "description": {
+            "item": "<int>"
+        }
+    },
+    {
+        "key": "consume",
+        "description": {
+            "item": "<int>"
+        }
+    },
+    {
+        "key": "speak",
+        "description": {
+            "dialog": "<str>",
+            "isRepeat": "<bool>",
+            "delay": "<float>"
+        }
+    },
+    {
+        "key": "shoot",
+        "description": {
+            "target": "<int>",
+            "weapon": "<int>"
+        }
+    },
+    {
+        "key": "punch",
+        "description": {
+            "target": "<int>"
+        }
+    }
+]
