@@ -13,14 +13,15 @@ from transformers import (
 )
 from peft import LoraConfig, PeftModel
 from trl import SFTTrainer
+from prompts import sft_prompt, sft_inst
 
 DATA_PATH = './data/'
 
 ### Modify the path in each stage ###
 model_path = 'C:/Users/PC/.cache/huggingface/hub/models--meta-llama--Llama-2-7b-chat-hf/snapshots/f5db02db724555f92da89c216ac04704f23d4590' # path to the LLM to be finetuned
-save_path = './finetuned_llm' # path to save the finetuned model
+save_path = './other_sft/checkpoint' # path to save the finetuned model
 
-new_model = "finetune-test"
+new_model = "./other_sft/sft_model"
 lora_r = 64
 lora_alpha = 16
 lora_dropout = 0.1
@@ -50,36 +51,65 @@ max_seq_length = None
 packing = False
 device_map = {"": 0}
 
-system_message = """You are a professional game analyst. A player is playing a 2D Minecraft game. You will get the player's observation, status information, and its comprehension score of language guidance. You will be asked to provide concise summaries and suggestions about this player."""
 
-def split_data(data_file, train_file, test_file, train_ratio=0.9):
+# def split_data(data_file, train_file, test_file, train_ratio=0.9):
 
-    with open(data_file, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
+#     with open(data_file, 'r', encoding='utf-8') as f:
+#         lines = f.readlines()
 
-    train_size = int(len(lines) * train_ratio)
-    train_data = lines[:train_size]
-    test_data = lines[train_size:]
+#     train_size = int(len(lines) * train_ratio)
+#     train_data = lines[:train_size]
+#     test_data = lines[train_size:]
 
-    with open(train_file, 'w', encoding='utf-8') as f:
-        for item in train_data:
-            f.write(item)
+#     with open(train_file, 'w', encoding='utf-8') as f:
+#         for item in train_data:
+#             f.write(item)
 
-    with open(test_file, 'w', encoding='utf-8') as f:
-        for item in test_data:
-            f.write(item)
+#     with open(test_file, 'w', encoding='utf-8') as f:
+#         for item in test_data:
+#             f.write(item)
 
-split_data(DATA_PATH + 'data.jsonl', DATA_PATH + 'train.jsonl', DATA_PATH + 'test.jsonl')
+# split_data(DATA_PATH + 'train.jsonl', DATA_PATH + 'train.jsonl', DATA_PATH + 'valid.jsonl')
 
 
 # Load datasets
 train_dataset = load_dataset('json', data_files=DATA_PATH + 'train.jsonl', split="train")
-valid_dataset = load_dataset('json', data_files=DATA_PATH + 'test.jsonl', split="train")
+valid_dataset = load_dataset('json', data_files=DATA_PATH + 'valid.jsonl', split="train")
+
+# valid_actions = """Available actions:
+# [
+#     "idle(isCombat=<bool>)"
+#     "walk(target=<str>)"
+#     "run(target=<str>)"
+#     "jump()"
+#     "roll(direction=<int>)"
+#     "punch(target=<str>)"
+#     "melee(target=<str>)" ## only valid with melee weapon on hand
+#     "shoot(target=<str>)" ## only valid with range weapon on hand
+#     "magic(target=<str>)" ## only valid with magic weapon on hand
+#     "block()"
+#     "pickup(item=<str>)"
+#     "consume(item=<str>)"
+#     "talk(dialog=<str>)"
+#     "open(item=<str>)"
+#     "close(item=<str>)"
+#     "check_status(target=<str>)"
+#     "use(item=<str>)" ## only valid with household equipment on hand
+# ]
+# """
+# valid_actions = ""
 
 # Preprocess datasets
-train_dataset_mapped = train_dataset.map(lambda examples: {'text': [f'[INST] <<SYS>>\n{system_message.strip()}\n<</SYS>>\n\n' + prompt + ' [/INST] ' + response for prompt, response in zip(examples['prompt'], examples['response'])]}, batched=True)
-valid_dataset_mapped = valid_dataset.map(lambda examples: {'text': [f'[INST] <<SYS>>\n{system_message.strip()}\n<</SYS>>\n\n' + prompt + ' [/INST] ' + response for prompt, response in zip(examples['prompt'], examples['response'])]}, batched=True)
+def format_prompt(example):
+    return {
+        'text': [
+            sft_prompt.format(system_message=sft_inst, scene=scene, goal=goal, actions=actions, feedback=feedback)
+            for scene, goal, actions, feedback in zip(example['scene'], example['goal'], example['actions'], example['feedback'])
+        ]
+    }
 
+train_dataset_mapped = train_dataset.map(format_prompt, batched=True)
+valid_dataset_mapped = valid_dataset.map(format_prompt, batched=True)
 compute_dtype = getattr(torch, bnb_4bit_compute_dtype)
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=use_4bit,

@@ -1,0 +1,14 @@
+{
+    "scene": "SCENE DESCRIPTION",
+    "goal": "GOAL FOR AGENT",
+    "actions": "ACTION SEQUENCE",
+    "feedback": "FEEDBACK TEXT",
+    "score": "EVALUATION ACTION SCORE"
+},
+{
+    "scene": "SCENE DESCRIPTION",
+    "goal": "GOAL FOR AGENT",
+    "actions": "ACTION SEQUENCE",
+    "feedback": "FEEDBACK TEXT",
+    "score": "EVALUATION ACTION SCORE"
+}

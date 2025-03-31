@@ -5,16 +5,16 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from dataset import ActionGoalDataset
-from predictor import ActionEvaluator
-from utils import embed_text, tokenize, get_device
+from rw_model.dataset import ActionGoalDataset
+from rw_model.predictor import ActionEvaluator
+from rw_model.utils import embed_text, tokenize, get_device
 import random
 
 # Load datasets
-train_dataset = ActionGoalDataset("./data/train.json")
-valid_dataset = ActionGoalDataset("./data/valid.json")
-test_dataset = ActionGoalDataset("./data/test.json")
-print(len(train_dataset))
+train_dataset = ActionGoalDataset("./data_rw/train.json")
+valid_dataset = ActionGoalDataset("./data_rw/valid.json")
+test_dataset = ActionGoalDataset("./data_rw/test.json")
+
 batch_size = 16
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -78,4 +78,4 @@ for epoch in range(num_epochs):
             tepoch.update(1)
             index += 1
 
-torch.save(model.state_dict(), "./checkpoint/checkpoint_ver1.pth")
+torch.save(model.state_dict(), "./rw_model/checkpoint/checkpoint_ver1.pth")
